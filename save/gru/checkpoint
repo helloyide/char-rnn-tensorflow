@@ -1,0 +1,5 @@
+model_checkpoint_path: "gru_final"
+all_model_checkpoint_paths: "model.ckpt-0"
+all_model_checkpoint_paths: "model.ckpt-3000"
+all_model_checkpoint_paths: "model.ckpt-4949"
+all_model_checkpoint_paths: "gru_final"
