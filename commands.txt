@@ -141,3 +141,64 @@ LSTM, unfrozen: 2.3M + 12M = 14.3M
 LSTM, frozen: 4.6M
 GRU, unfrozen: 2.9M + 9.1M = 12M
 GRU, frozen: 4.7M
+
+Pruning
+=====
+LSTM (threshold 0.1)
+
+rnnlm/softmax_w:0
+number of almost zero elements 6872 in 19000, %36.16842105263158
+number of nonzero in matrix (before pruning) 19000
+number of nonzero in matrix (after pruning) 12128
+rnnlm/softmax_b:0
+number of almost zero elements 50 in 95, %52.63157894736842
+number of nonzero in matrix (before pruning) 95
+number of nonzero in matrix (after pruning) 45
+rnnlm/multi_rnn_cell/cell_0/lstm_cell/kernel:0
+number of almost zero elements 205689 in 320000, %64.2778125
+number of nonzero in matrix (before pruning) 320000
+number of nonzero in matrix (after pruning) 114311
+rnnlm/multi_rnn_cell/cell_1/lstm_cell/kernel:0
+number of almost zero elements 233100 in 320000, %72.84375
+number of nonzero in matrix (before pruning) 320000
+number of nonzero in matrix (after pruning) 86900
+rnnlm/multi_rnn_cell/cell_2/lstm_cell/kernel:0
+number of almost zero elements 242525 in 320000, %75.7890625
+number of nonzero in matrix (before pruning) 320000
+number of nonzero in matrix (after pruning) 77475
+
+
+GRU (threshold 0.15)
+
+rnnlm/softmax_w:0
+number of almost zero elements 11199 in 19000, %58.9421052631579
+number of nonzero in matrix (before pruning) 19000
+number of nonzero in matrix (after pruning) 7801
+rnnlm/softmax_b:0
+number of almost zero elements 78 in 95, %82.10526315789474
+number of nonzero in matrix (before pruning) 95
+number of nonzero in matrix (after pruning) 17
+rnnlm/multi_rnn_cell/cell_0/gru_cell/gates/kernel:0
+number of almost zero elements 100409 in 160000, %62.755625
+number of nonzero in matrix (before pruning) 160000
+number of nonzero in matrix (after pruning) 59591
+rnnlm/multi_rnn_cell/cell_0/gru_cell/candidate/kernel:0
+number of almost zero elements 60243 in 80000, %75.30375000000001
+number of nonzero in matrix (before pruning) 80000
+number of nonzero in matrix (after pruning) 19757
+rnnlm/multi_rnn_cell/cell_1/gru_cell/gates/kernel:0
+number of almost zero elements 97312 in 160000, %60.81999999999999
+number of nonzero in matrix (before pruning) 160000
+number of nonzero in matrix (after pruning) 62688
+rnnlm/multi_rnn_cell/cell_1/gru_cell/candidate/kernel:0
+number of almost zero elements 58038 in 80000, %72.5475
+number of nonzero in matrix (before pruning) 80000
+number of nonzero in matrix (after pruning) 21962
+rnnlm/multi_rnn_cell/cell_2/gru_cell/gates/kernel:0
+number of almost zero elements 104766 in 160000, %65.47874999999999
+number of nonzero in matrix (before pruning) 160000
+number of nonzero in matrix (after pruning) 55234
+rnnlm/multi_rnn_cell/cell_2/gru_cell/candidate/kernel:0
+number of almost zero elements 60219 in 80000, %75.27374999999999
+number of nonzero in matrix (before pruning) 80000
+number of nonzero in matrix (after pruning) 19781
