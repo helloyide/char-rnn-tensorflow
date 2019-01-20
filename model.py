@@ -26,7 +26,7 @@ class Model():
         # warp multi layered rnn cell into one cell with dropout
         cells = []
         for _ in range(args.num_layers):
-            cell = cell_fn(args.rnn_size)
+            cell = cell_fn(args.rnn_size, dtype=tf.float32)
             if training and (args.output_keep_prob < 1.0 or args.input_keep_prob < 1.0):
                 cell = rnn.DropoutWrapper(cell,
                                           input_keep_prob=args.input_keep_prob,
@@ -36,9 +36,9 @@ class Model():
 
         # input/target data (int32 since input is char-level)
         self.input_data = tf.placeholder(
-            tf.int32, [args.batch_size, args.seq_length])
+            tf.int32, [args.batch_size, args.seq_length], name="input_data")
         self.targets = tf.placeholder(
-            tf.int32, [args.batch_size, args.seq_length])
+            tf.int32, [args.batch_size, args.seq_length], name="targets")
         self.initial_state = cell.zero_state(args.batch_size, tf.float32)
 
         # softmax output layer, use softmax to classify

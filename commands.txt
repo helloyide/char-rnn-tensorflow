@@ -22,6 +22,16 @@ python3 train.py \
 --num_epochs 25 \
 --save_every 9999 \
 
+# perplexity LSTM
+python3 evaluator.py \
+--save_dir save/lstm \
+--data_dir data/completeshakespeare_test \
+
+# perplexity GRU
+python3 evaluator.py \
+--save_dir save/gru \
+--data_dir data/completeshakespeare_test \
+
 
 # freeze LSTM model
 python3 ~/.local/lib/python3.6/site-packages/tensorflow/python/tools/freeze_graph.py \
@@ -60,6 +70,17 @@ python3 statistic.py \
 python3 statistic.py \
 --frozen_filename save/gru/gru_final_frozen.pb \
 
+# quantize LSTM
+python3 quantization.py \
+--frozen_model_file save/lstm/lstm_final_frozen.pb \
+--input_node_name input_data \
+--output_node_name output_logits \
+--output_file save/lstm/quantized_model.tflite \
+
+python3 quantization.py \
+--saved_model_dir save_lstm \
+--output_file save_lstm/quantized_model.tflite \
+
 
 # sample
 python3 sample.py \
@@ -68,15 +89,7 @@ python3 sample.py \
 --sample 0 \
 --prime I \
 
-# perplexity LSTM
-python3 evaluator.py \
---save_dir save/lstm \
---data_dir data/completeshakespeare_test \
 
-# perplexity GRU
-python3 evaluator.py \
---save_dir save/gru \
---data_dir data/completeshakespeare_test \
 
 PP
 =====

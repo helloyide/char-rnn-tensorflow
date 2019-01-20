@@ -155,6 +155,11 @@ def train(args):
         saver.save(sess, final_model_path)
         print("final model saved to {}".format(final_model_path))
 
+        # save final model with SaveModel format (may need by other tools like tflite transform)
+        tf.saved_model.simple_save(sess, os.path.join(args.save_dir, "lstm_SaveModel"),
+                                   inputs={"input_data": model.input_data, "targets": model.targets},
+                                   outputs={"output_logits": model.logits})
+
 
 if __name__ == '__main__':
     train(args)

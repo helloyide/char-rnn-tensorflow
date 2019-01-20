@@ -32,6 +32,7 @@ def main(args):
     if args.frozen_filename:
         graph = load_frozen_graph(args.frozen_filename)
         print("%d ops in the frozen graph." % len(graph.as_graph_def().node))
+        # print(graph.as_graph_def().node)
 
         if args.frozen_graph_output_path:
             writer = tf.summary.FileWriter(
