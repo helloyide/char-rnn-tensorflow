@@ -27,9 +27,19 @@ python3 evaluator.py \
 --save_dir save/lstm \
 --data_dir data/completeshakespeare_test \
 
+# perplexity LSTM pruned
+python3 evaluator.py \
+--save_dir save/lstm_pruned \
+--data_dir data/completeshakespeare_test \
+
 # perplexity GRU
 python3 evaluator.py \
 --save_dir save/gru \
+--data_dir data/completeshakespeare_test \
+
+# perplexity GRU pruned
+python3 evaluator.py \
+--save_dir save/gru_pruned \
 --data_dir data/completeshakespeare_test \
 
 
@@ -70,13 +80,27 @@ python3 statistic.py \
 python3 statistic.py \
 --frozen_filename save/gru/gru_final_frozen.pb \
 
-# quantize LSTM
+# pruning LSTM
+python3 pruning.py \
+--meta_filename save/lstm/lstm_final.meta \
+--checkpoint save/lstm/lstm_final \
+--output_path save/lstm_pruned/lstm_pruned \
+--threshold 0.1
+
+# pruning GRU
+python3 pruning.py \
+--meta_filename save/gru/gru_final.meta \
+--checkpoint save/gru/gru_final \
+--output_path save/gru_pruned/gru_pruned \
+--threshold 0.15
+
+# !quantize LSTM
 python3 quantization.py \
 --frozen_model_file save/lstm/lstm_final_frozen.pb \
 --input_node_name input_data \
 --output_node_name output_logits \
 --output_file save/lstm/quantized_model.tflite \
-
+# !
 python3 quantization.py \
 --saved_model_dir save_lstm \
 --output_file save_lstm/quantized_model.tflite \
@@ -93,13 +117,15 @@ python3 sample.py \
 
 PP
 =====
-LSTM: 4.00373763573208
-GRU: 3.0826562521299854
+LSTM: 4.002215712328844
+LSTM, pruned (0.1): 4.07077470928141
+GRU: 3.086322681689072
+GRU, pruned (0.15): 3.1736782135705255
 
 Inference Time (in sec)
 =====
-LSTM, GPU: 0.15461254119873047
-GRU, GPU: 0.15486407279968262
+LSTM, GPU: 3.242310047149658
+GRU, GPU: 2.906440019607544
 
 Ops
 =====

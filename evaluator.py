@@ -57,7 +57,7 @@ def evaluate(args):
                     for i, c in enumerate(model.initial_state):
                         feed[c] = state[i]
 
-                sum_mean_loss, count = sess.run([model.pp_sum_mean_loss, model.pp_count], feed)
+                sum_mean_loss, count, _ = sess.run([model.pp_sum_mean_loss, model.pp_count, model.ppl], feed)
                 all_sum_mean_loss += sum_mean_loss
                 all_count += count
 
