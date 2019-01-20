@@ -36,6 +36,7 @@ class TextLoader():
         self.vocab = dict(zip(self.chars, range(len(self.chars))))
         with open(vocab_file, 'wb') as f:
             cPickle.dump(self.chars, f)
+        # tensor represent all characters in the input_file, each char is represented with the vocabulary index
         self.tensor = np.array(list(map(self.vocab.get, data)))
         np.save(tensor_file, self.tensor)
 

@@ -7,14 +7,15 @@ import time
 import os
 from six.moves import cPickle
 
-
 parser = argparse.ArgumentParser(
-                    formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 # Data and model checkpoints directories
 parser.add_argument('--data_dir', type=str, default='data/tinyshakespeare',
                     help='data directory containing input.txt with training examples')
 parser.add_argument('--save_dir', type=str, default='save',
                     help='directory to store checkpointed models')
+parser.add_argument('--final_save_name', type=str, default='final',
+                    help='the last checkpointed model name')
 parser.add_argument('--log_dir', type=str, default='logs',
                     help='directory to store tensorboard logs')
 parser.add_argument('--save_every', type=int, default=1000,
@@ -68,9 +69,11 @@ def train(args):
     # check compatibility if training is continued from previously saved model
     if args.init_from is not None:
         # check if all necessary files exist
-        assert os.path.isdir(args.init_from)," %s must be a a path" % args.init_from
-        assert os.path.isfile(os.path.join(args.init_from,"config.pkl")),"config.pkl file does not exist in path %s"%args.init_from
-        assert os.path.isfile(os.path.join(args.init_from,"chars_vocab.pkl")),"chars_vocab.pkl.pkl file does not exist in path %s" % args.init_from
+        assert os.path.isdir(args.init_from), " %s must be a a path" % args.init_from
+        assert os.path.isfile(
+            os.path.join(args.init_from, "config.pkl")), "config.pkl file does not exist in path %s" % args.init_from
+        assert os.path.isfile(os.path.join(args.init_from,
+                                           "chars_vocab.pkl")), "chars_vocab.pkl.pkl file does not exist in path %s" % args.init_from
         ckpt = tf.train.latest_checkpoint(args.init_from)
         assert ckpt, "No checkpoint found"
 
@@ -79,13 +82,14 @@ def train(args):
             saved_model_args = cPickle.load(f)
         need_be_same = ["model", "rnn_size", "num_layers", "seq_length"]
         for checkme in need_be_same:
-            assert vars(saved_model_args)[checkme]==vars(args)[checkme],"Command line argument and saved model disagree on '%s' "%checkme
+            assert vars(saved_model_args)[checkme] == vars(args)[
+                checkme], "Command line argument and saved model disagree on '%s' " % checkme
 
         # open saved vocab/dict and check if vocabs/dicts are compatible
         with open(os.path.join(args.init_from, 'chars_vocab.pkl'), 'rb') as f:
             saved_chars, saved_vocab = cPickle.load(f)
-        assert saved_chars==data_loader.chars, "Data and loaded model disagree on character set!"
-        assert saved_vocab==data_loader.vocab, "Data and loaded model disagree on dictionary mappings!"
+        assert saved_chars == data_loader.chars, "Data and loaded model disagree on character set!"
+        assert saved_vocab == data_loader.vocab, "Data and loaded model disagree on dictionary mappings!"
 
     if not os.path.isdir(args.save_dir):
         os.makedirs(args.save_dir)
@@ -100,7 +104,7 @@ def train(args):
         # instrument for tensorboard
         summaries = tf.summary.merge_all()
         writer = tf.summary.FileWriter(
-                os.path.join(args.log_dir, time.strftime("%Y-%m-%d-%H-%M-%S")))
+            os.path.join(args.log_dir, time.strftime("%Y-%m-%d-%H-%M-%S")))
         writer.add_graph(sess.graph)
 
         sess.run(tf.global_variables_initializer())
@@ -114,22 +118,29 @@ def train(args):
             data_loader.reset_batch_pointer()
             state = sess.run(model.initial_state)
             for b in range(data_loader.num_batches):
-                start = time.time()
+                # both x and y have shape (batch_size, seq_length)
                 x, y = data_loader.next_batch()
                 feed = {model.input_data: x, model.targets: y}
-                for i, (c, h) in enumerate(model.initial_state):
-                    feed[c] = state[i].c
-                    feed[h] = state[i].h
+
+
+                # for LSTM each initial_state element is a tuple, for GRU it is a tensor
+                if args.model == "lstm":
+                    for i, (c, h) in enumerate(model.initial_state):
+                        feed[c] = state[i].c
+                        feed[h] = state[i].h
+                elif args.model == "gru":
+                    for i, c in enumerate(model.initial_state):
+                        feed[c] = state[i]
+
 
                 # instrument for tensorboard
                 summ, train_loss, state, _ = sess.run([summaries, model.cost, model.final_state, model.train_op], feed)
                 writer.add_summary(summ, e * data_loader.num_batches + b)
 
-                end = time.time()
-                print("{}/{} (epoch {}), train_loss = {:.3f}, time/batch = {:.3f}"
+                print("{}/{} (epoch {}), train_loss = {:.3f}"
                       .format(e * data_loader.num_batches + b,
                               args.num_epochs * data_loader.num_batches,
-                              e, train_loss, end - start))
+                              e, train_loss))
                 if (e * data_loader.num_batches + b) % args.save_every == 0\
                         or (e == args.num_epochs-1 and
                             b == data_loader.num_batches-1):
@@ -138,6 +149,11 @@ def train(args):
                     saver.save(sess, checkpoint_path,
                                global_step=e * data_loader.num_batches + b)
                     print("model saved to {}".format(checkpoint_path))
+
+        # save final model
+        final_model_path = os.path.join(args.save_dir, args.final_save_name)
+        saver.save(sess, final_model_path)
+        print("final model saved to {}".format(final_model_path))
 
 
 if __name__ == '__main__':

@@ -1,0 +1,104 @@
+# train LSTM
+python3 train.py \
+--data_dir data/completeshakespeare \
+--final_save_name lstm_final \
+--model lstm \
+--rnn_size 200 \
+--num_layers 3 \
+--seq_length 60 \
+--batch_size 256 \
+--num_epochs 25 \
+--save_every 9999 \
+
+# train GRU
+python3 train.py \
+--data_dir data/completeshakespeare \
+--final_save_name gru_final \
+--model gru \
+--rnn_size 200 \
+--num_layers 3 \
+--seq_length 60 \
+--batch_size 256 \
+--num_epochs 25 \
+--save_every 9999 \
+
+
+# freeze LSTM model
+python3 ~/.local/lib/python3.6/site-packages/tensorflow/python/tools/freeze_graph.py \
+--input_meta_graph save/lstm/lstm_final.meta \
+--input_binary True \
+--input_checkpoint save/lstm/lstm_final \
+--output_graph save/lstm/lstm_final_frozen.pb \
+--output_node_names output_logits \
+--clear_devices True \
+
+# freeze GRU model
+python3 ~/.local/lib/python3.6/site-packages/tensorflow/python/tools/freeze_graph.py \
+--input_meta_graph save/gru/gru_final.meta \
+--input_binary True \
+--input_checkpoint save/gru/gru_final \
+--output_graph save/gru/gru_final_frozen.pb \
+--output_node_names output_logits \
+--clear_devices True \
+
+# count the nodes of unfrozen LSTM
+python3 statistic.py \
+--meta_filename save/lstm/lstm_final.meta \
+--checkpoint save/lstm/lstm_final \
+
+# count the nodes of frozen LSTM
+python3 statistic.py \
+--frozen_filename save/lstm/lstm_final_frozen.pb \
+--frozen_graph_output_path logs/lstm_frozen \
+
+# count the nodes of unfrozen GRU
+python3 statistic.py \
+--meta_filename save/gru/gru_final.meta \
+--checkpoint save/gru/gru_final \
+
+# count the nodes of frozen GRU
+python3 statistic.py \
+--frozen_filename save/gru/gru_final_frozen.pb \
+
+
+# sample
+python3 sample.py \
+--save_dir save \
+-n 10 \
+--sample 0 \
+--prime I \
+
+# perplexity LSTM
+python3 evaluator.py \
+--save_dir save/lstm \
+--data_dir data/completeshakespeare_test \
+
+# perplexity GRU
+python3 evaluator.py \
+--save_dir save/gru \
+--data_dir data/completeshakespeare_test \
+
+PP
+=====
+LSTM: 4.00373763573208
+GRU: 3.0826562521299854
+
+Inference Time (in sec)
+=====
+LSTM, GPU: 0.15461254119873047
+GRU, GPU: 0.15486407279968262
+
+Ops
+=====
+LSTM, unfrozen: 9613
+LSTM, frozen: 3186
+GRU, unfrozen: 11424
+GRU, frozen: 3360
+
+
+Saved file size
+=====
+LSTM, unfrozen: 2.3M + 12M = 14.3M
+LSTM, frozen: 4.6M
+GRU, unfrozen: 2.9M + 9.1M = 12M
+GRU, frozen: 4.7M

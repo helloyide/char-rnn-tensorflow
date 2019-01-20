@@ -31,10 +31,14 @@ def sample(args):
     with open(os.path.join(args.save_dir, 'config.pkl'), 'rb') as f:
         saved_args = cPickle.load(f)
     with open(os.path.join(args.save_dir, 'chars_vocab.pkl'), 'rb') as f:
+        # chars is a tuple of vocabulary chars, tuple length is vocab_size
+        # vocab is a dict of char and its index, dict length is vocab_size
         chars, vocab = cPickle.load(f)
     #Use most frequent char if no prime is given
     if args.prime == '':
         args.prime = chars[0]
+
+    saved_args.seq_length = 1
     model = Model(saved_args, training=False)
     with tf.Session() as sess:
         tf.global_variables_initializer().run()
@@ -42,8 +46,7 @@ def sample(args):
         ckpt = tf.train.get_checkpoint_state(args.save_dir)
         if ckpt and ckpt.model_checkpoint_path:
             saver.restore(sess, ckpt.model_checkpoint_path)
-            data = model.sample(sess, chars, vocab, args.n, args.prime,
-                               args.sample).encode('utf-8')
+            data = model.sample(sess, chars, vocab, args.n, args.prime, args.sample).encode('utf-8')
             print(data.decode("utf-8"))
 
 if __name__ == '__main__':
